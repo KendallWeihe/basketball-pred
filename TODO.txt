@@ -1,0 +1,22 @@
+BACKUP DATA!!!
+
+scrape data from teamrankings that includes vegas spread
+  TODO: will need to generate lookup of sorts for team names across datasets
+
+TODO:
+  train and save models for each game number 10-25
+
+TODO TEST:
+  for day in team_rankings:
+    for team in day:
+      move team data file to tmp/ dir
+      find game number of team
+      define game number based on ^^^
+      restore model based on game_number
+      make prediction on single game
+      save prediction as right/wrong
+
+TODO TEST v2:
+  save models across thousands of iterations
+  make multiple predictions from different models
+  average prediction spread value
