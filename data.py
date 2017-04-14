@@ -7,8 +7,9 @@ def compute_acc(samples, ground_truth):
     difference = 0
     for s, d in zip(samples, ground_truth):
         difference = difference + math.fabs(s - d)
+        print("My prediction: {:.3f}\tActual spread: {}".format(s, d))
 
-    print("Custom accuracy: {}\n".format(float(difference) / float(len(samples))))
+    print("Custom accuracy: {}".format(float(difference) / float(len(samples))))
 
 class Data:
     def __init__(self, config):
