@@ -52,3 +52,9 @@ TODO TEST v2:
   average prediction spread value
 
 TODO: identify home or away game in scrape.py
+
+
+TODO:
+transfer data over Drive
+  including models
+change paths in code

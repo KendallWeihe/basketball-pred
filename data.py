@@ -15,12 +15,13 @@ class Data:
     def __init__(self, config):
         self.teams = self.read_teams(config)
         self.read_data(config)
-        np.random.shuffle(self.raw_data)
-        self.num_training_examples = float(self.raw_data.shape[0]) * config["training_percentage"]
-        self.generate_training_data(config)
-        self.generate_testing_data(config)
-        self.generate_verification_data(config)
-        self.normalize_data()
+        if config["training"]:
+            np.random.shuffle(self.raw_data)
+            self.num_training_examples = float(self.raw_data.shape[0]) * config["training_percentage"]
+            self.generate_training_data(config)
+            self.generate_testing_data(config)
+            self.generate_verification_data(config)
+            self.normalize_data()
 
     def read_teams(self, config):
         teamsFile = open(config["teams_file"], "r")
@@ -140,3 +141,6 @@ class Data:
 
     def get_verification_data(self):
         return self.verification_data, self.verification_ground_truth
+
+    def get_raw_data(self):
+        return self.raw_data

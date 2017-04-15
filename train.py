@@ -12,18 +12,21 @@ config = {
     "teams_file": "/home/kendall/Development/basketball-db/teams.txt",
     "training_percentage": 0.85,
     "n_input": 94,
-    "n_hidden": 256,
+    "n_hidden": 128,
     "n_classes": 1,
     "n_steps": 22,
     "learning_rate": 0.01,
     "batch_size": 60,
     "save_model_path": "./models/23/",
     "save_step": 1000,
-    "training_iterations": 20001
+    "training_iterations": 20001,
+    "training": True,
+    "dropout": 0.75
 }
 
 x = tf.placeholder("float", [None, config["n_steps"], config["n_input"]])
 y = tf.placeholder("float", [None])
+keep_prob = tf.placeholder("float")
 
 weights = {
     'out' : tf.get_variable("weights_1", shape=[config["n_hidden"], config["n_classes"]],
@@ -56,21 +59,19 @@ with tf.Session() as sess:
         batch_x = training_data[start_pos:start_pos+config["batch_size"],:,:]
         batch_y = ground_truth[start_pos:start_pos+config["batch_size"]]
         sess.run(optimizer, feed_dict={x: batch_x, y: batch_y})
-        train_acc, train_loss = sess.run([accuracy, cost], feed_dict={x: batch_x, y: batch_y})
+        train_acc, train_loss = sess.run([accuracy, cost], feed_dict={x: batch_x, y: batch_y, keep_prob: config["dropout"]})
 
-        sess.run(optimizer, feed_dict={x: testing_data, y: testing_ground_truth})
-        test_acc, test_loss = sess.run([accuracy, cost], feed_dict={x: testing_data, y: testing_ground_truth})
-        samples = sess.run(pred, feed_dict={x: testing_data})
+        samples = sess.run(pred, feed_dict={x: testing_data, keep_prob: 1.0})
         data.compute_acc(samples, testing_ground_truth, "testing")
+        # test_acc, test_loss = sess.run([accuracy, cost], feed_dict={x: testing_data, y: testing_ground_truth, keep_prob: 1.0})
 
-        sess.run(optimizer, feed_dict={x: verification_data, y: verification_ground_truth})
-        verification_acc, verification_loss = sess.run([accuracy, cost], feed_dict={x: verification_data, y: verification_ground_truth})
-        samples = sess.run(pred, feed_dict={x: verification_data})
+        samples = sess.run(pred, feed_dict={x: verification_data, keep_prob: 1.0})
         data.compute_acc(samples, verification_ground_truth, "verification")
+        # verification_acc, verification_loss = sess.run([accuracy, cost], feed_dict={x: verification_data, y: verification_ground_truth, keep_prob: 1.0})
 
         print("Training\tAcc: {}\tLoss: {}".format(train_acc, train_loss))
-        print("Testing\t\tAcc: {}\tLoss: {}".format(test_acc, test_loss))
-        print("Verification\t\tAcc: {}\tLoss: {}".format(verification_acc, verification_loss))
+        # print("Testing\t\tAcc: {}\tLoss: {}".format(test_acc, test_loss))
+        # print("Verification\t\tAcc: {}\tLoss: {}".format(verification_acc, verification_loss))
         print("Iteration: {}\n".format(iteration))
 
         if iteration % config["save_step"] == 0:
