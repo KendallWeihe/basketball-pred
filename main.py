@@ -7,17 +7,19 @@ import network
 
 config = {
     "seasons_path": "/home/kendall/Development/basketball-db/seasons/",
-    "game_number": 15,
+    "verification_path": "/home/kendall/Development/2017/",
+    "game_number": 23,
     "teams_file": "/home/kendall/Development/basketball-db/teams.txt",
     "training_percentage": 0.85,
     "n_input": 94,
     "n_hidden": 256,
     "n_classes": 1,
-    "n_steps": 14,
+    "n_steps": 22,
     "learning_rate": 0.01,
     "batch_size": 60,
-    "save_model_path": "./models/15/",
-    "save_step": 1000
+    "save_model_path": "./models/23/",
+    "save_step": 1000,
+    "training_iterations": 100001
 }
 
 x = tf.placeholder("float", [None, config["n_steps"], config["n_input"]])
@@ -47,27 +49,29 @@ with tf.Session() as sess:
     sess.run(init)
     training_data, ground_truth = d.get_training_data()
     testing_data, testing_ground_truth = d.get_testing_data()
+    verification_data, verification_ground_truth = d.read_verification_data(config)
 
-    for iteration in range(100000):
+    for iteration in range(config["training_iterations"]):
         start_pos = np.random.randint(len(training_data) - config["batch_size"])
         batch_x = training_data[start_pos:start_pos+config["batch_size"],:,:]
         batch_y = ground_truth[start_pos:start_pos+config["batch_size"]]
         sess.run(optimizer, feed_dict={x: batch_x, y: batch_y})
         train_acc, train_loss = sess.run([accuracy, cost], feed_dict={x: batch_x, y: batch_y})
 
-        # start_pos = np.random.randint(len(testing_data) - config["batch_size"])
-        # batch_x = testing_data[start_pos:start_pos+config["batch_size"],:,:]
-        # batch_y = testing_ground_truth[start_pos:start_pos+config["batch_size"]]
-        batch_x = testing_data
-        batch_y = testing_ground_truth
-        sess.run(optimizer, feed_dict={x: batch_x, y: batch_y})
-        test_acc, test_loss = sess.run([accuracy, cost], feed_dict={x: batch_x, y: batch_y})
-        samples = sess.run(pred, feed_dict={x: batch_x})
-        # print samples
-        data.compute_acc(samples, batch_y)
+        sess.run(optimizer, feed_dict={x: testing_data, y: testing_ground_truth})
+        test_acc, test_loss = sess.run([accuracy, cost], feed_dict={x: testing_data, y: testing_ground_truth})
+        samples = sess.run(pred, feed_dict={x: testing_data})
+        data.compute_acc(samples, testing_ground_truth, "testing")
+
+        sess.run(optimizer, feed_dict={x: verification_data, y: verification_ground_truth})
+        verification_acc, verification_loss = sess.run([accuracy, cost], feed_dict={x: verification_data, y: verification_ground_truth})
+        samples = sess.run(pred, feed_dict={x: verification_data})
+        data.compute_acc(samples, verification_ground_truth, "verification")
 
         print("Training\tAcc: {}\tLoss: {}".format(train_acc, train_loss))
         print("Testing\t\tAcc: {}\tLoss: {}".format(test_acc, test_loss))
+        print("Verification\t\tAcc: {}\tLoss: {}".format(verification_acc, verification_loss))
+        print("Iteration: {}\n".format(iteration))
 
         if iteration % config["save_step"] == 0:
-            saver.save(sess, config["save_model_path"])
+            saver.save(sess, config["save_model_path"]+str(iteration)+".ckpt")

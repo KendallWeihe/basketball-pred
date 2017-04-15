@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow.contrib import slim
 from tensorflow.python.ops import rnn, rnn_cell
 
 def RNN(x, weights, biases, config):
@@ -8,7 +9,10 @@ def RNN(x, weights, biases, config):
     lstm_cell = rnn_cell.BasicLSTMCell(config["n_hidden"], forget_bias=1.0)
     outputs, states = rnn.rnn(lstm_cell, x, dtype=tf.float32)
     all_lstm_outputs = tf.reshape(tf.stack(outputs, axis=1), [-1, config["n_steps"]*config["n_hidden"]])
-    output = tf.matmul(outputs[-1], weights['out']) + biases['out']
+    # output = tf.matmul(outputs[-1], weights['out']) + biases['out']
     # output = tf.matmul(all_lstm_outputs, weights['all_out']) + biases['out']
+    l1 = slim.batch_norm(slim.fully_connected(outputs[-1], 50))
+    l2 = slim.batch_norm(slim.fully_connected(l1, 50))
+    output = slim.fully_connected(l2, 1, activation_fn=None)
     output = tf.reshape(output, [-1])
     return tf.nn.dropout(output, 0.75)

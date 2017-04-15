@@ -3,13 +3,13 @@ import numpy as np
 import pdb
 import math
 
-def compute_acc(samples, ground_truth):
+def compute_acc(samples, ground_truth, dataset_type):
     difference = 0
     for s, d in zip(samples, ground_truth):
         difference = difference + math.fabs(s - d)
-        print("My prediction: {:.3f}\tActual spread: {}".format(s, d))
+        # print("My prediction: {:.3f}\tActual spread: {}".format(s, d))
 
-    print("Custom accuracy: {}".format(float(difference) / float(len(samples))))
+    print("Custom {} accuracy: {}".format(dataset_type, float(difference) / float(len(samples))))
 
 class Data:
     def __init__(self, config):
@@ -44,12 +44,7 @@ class Data:
 
                     team2 = np.genfromtxt(config["seasons_path"]+s+"/"+team2_file+".csv", delimiter=",")
                     team2 = team2[::-1,:]
-
-                    team1_index = self.teams.index(f[:f.index(".")])
-                    for i in range(team2.shape[0]):
-                        if team2[i,43] == team1_index:
-                            team2_game_number = i
-                            break
+                    team2_game_number = np.where(team2[:,0] == team1[config["game_number"],0])[0][0]
 
                     team1 = team1[0:config["game_number"],]
                     if team2_game_number > config["game_number"]:
@@ -101,3 +96,43 @@ class Data:
 
     def get_testing_data(self):
         return self.testing_data, self.testing_ground_truth
+
+    def read_verification_data(self, config):
+        teams = os.listdir(config["verification_path"])
+
+        raw_data = []
+        for team1_file in teams:
+            team1 = np.genfromtxt(config["verification_path"]+team1_file, delimiter=",")
+
+            if team1.shape[0] < config["game_number"]:
+                continue
+
+            try:
+                team1 = team1[::-1,:]
+
+                team2_index = team1[config["game_number"],43]
+                team2_name = self.teams[int(team2_index)]
+
+                team2 = np.genfromtxt(config["verification_path"]+team2_name+".csv", delimiter=",")
+                team2 = team2[::-1,:]
+                team2_game_number = np.where(team2[:,0] == team1[config["game_number"],0])[0][0]
+
+                team1 = team1[0:config["game_number"],]
+                if team2_game_number > config["game_number"]:
+                    team2 = team2[team2_game_number-config["game_number"]:team2_game_number,:]
+                    aggregate_data = np.concatenate((team1, team2), axis=1)
+                elif team2_game_number < config["game_number"]:
+                    temp = np.zeros((config["game_number"], team1.shape[1]))
+                    temp[config["game_number"]-team2_game_number:config["game_number"],:] = team2[0:team2_game_number,:]
+                    aggregate_data = np.concatenate((team1, temp), axis=1)
+                else:
+                    aggregate_data = np.concatenate((team1, team2[0:config["game_number"],:]), axis=1)
+
+                raw_data.append(aggregate_data)
+
+            except:
+                continue
+
+        verification_data = np.array(raw_data)[:,0:config["game_number"]-1,:]
+        ground_truth = np.array(raw_data)[:,config["game_number"]-1,46]
+        return verification_data, ground_truth
