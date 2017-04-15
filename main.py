@@ -19,7 +19,7 @@ config = {
     "batch_size": 60,
     "save_model_path": "./models/23/",
     "save_step": 1000,
-    "training_iterations": 100001
+    "training_iterations": 20001
 }
 
 x = tf.placeholder("float", [None, config["n_steps"], config["n_input"]])
@@ -49,7 +49,7 @@ with tf.Session() as sess:
     sess.run(init)
     training_data, ground_truth = d.get_training_data()
     testing_data, testing_ground_truth = d.get_testing_data()
-    verification_data, verification_ground_truth = d.read_verification_data(config)
+    verification_data, verification_ground_truth = d.get_verification_data()
 
     for iteration in range(config["training_iterations"]):
         start_pos = np.random.randint(len(training_data) - config["batch_size"])

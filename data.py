@@ -19,6 +19,7 @@ class Data:
         self.num_training_examples = float(self.raw_data.shape[0]) * config["training_percentage"]
         self.generate_training_data(config)
         self.generate_testing_data(config)
+        self.generate_verification_data(config)
         self.normalize_data()
 
     def read_teams(self, config):
@@ -86,18 +87,7 @@ class Data:
         self.testing_data = np.array(testing_data)
         self.testing_ground_truth = np.array(ground_truth)
 
-    def normalize_data(self):
-        for i in range(self.raw_data.shape[2]):
-            self.training_data[:,:,i] = (self.training_data[:,:,i] - np.min(self.raw_data[:,:,i])) / (np.amax(self.raw_data[:,:,i]) - np.min(self.raw_data[:,:,i]))
-            self.testing_data[:,:,i] = (self.testing_data[:,:,i] - np.min(self.raw_data[:,:,i])) / (np.amax(self.raw_data[:,:,i]) - np.min(self.raw_data[:,:,i]))
-
-    def get_training_data(self):
-        return self.training_data, self.ground_truth
-
-    def get_testing_data(self):
-        return self.testing_data, self.testing_ground_truth
-
-    def read_verification_data(self, config):
+    def generate_verification_data(self, config):
         teams = os.listdir(config["verification_path"])
 
         raw_data = []
@@ -133,6 +123,20 @@ class Data:
             except:
                 continue
 
-        verification_data = np.array(raw_data)[:,0:config["game_number"]-1,:]
-        ground_truth = np.array(raw_data)[:,config["game_number"]-1,46]
-        return verification_data, ground_truth
+        self.verification_data = np.array(raw_data)[:,0:config["game_number"]-1,:]
+        self.verification_ground_truth = np.array(raw_data)[:,config["game_number"]-1,46]
+
+    def normalize_data(self):
+        for i in range(self.raw_data.shape[2]):
+            self.training_data[:,:,i] = (self.training_data[:,:,i] - np.min(self.raw_data[:,:,i])) / (np.amax(self.raw_data[:,:,i]) - np.min(self.raw_data[:,:,i]))
+            self.testing_data[:,:,i] = (self.testing_data[:,:,i] - np.min(self.raw_data[:,:,i])) / (np.amax(self.raw_data[:,:,i]) - np.min(self.raw_data[:,:,i]))
+            self.verification_data[:,:,i] = (self.verification_data[:,:,i] - np.min(self.raw_data[:,:,i])) / (np.amax(self.raw_data[:,:,i]) - np.min(self.raw_data[:,:,i]))
+
+    def get_training_data(self):
+        return self.training_data, self.ground_truth
+
+    def get_testing_data(self):
+        return self.testing_data, self.testing_ground_truth
+
+    def get_verification_data(self):
+        return self.verification_data, self.verification_ground_truth
