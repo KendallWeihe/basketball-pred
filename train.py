@@ -12,7 +12,7 @@ config = {
     "teams_file": "/home/kendall/Development/basketball-db/teams.txt",
     "training_percentage": 0.95,
     "n_input": 94,
-    "n_hidden": 16,
+    "n_hidden": 64,
     "n_classes": 1,
     "n_steps": 22,
     "learning_rate": 0.01,

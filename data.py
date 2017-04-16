@@ -29,6 +29,7 @@ class Data:
 
     def read_data(self, config):
         seasons = os.listdir(config["seasons_path"])
+        seasons.sort()
         raw_data = []
         for s in seasons:
             files = os.listdir(config["seasons_path"]+s)

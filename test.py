@@ -2,12 +2,12 @@ import numpy as np
 import os
 import pdb
 
-teamsFile = open("/Users/kendallweihe/Google Drive/Development/basketball-db/teams.txt", "r")
+teamsFile = open("/home/kendall/Development/basketball-db/teams.txt", "r")
 teams = teamsFile.read().splitlines()
 
-games = np.genfromtxt("/Users/kendallweihe/Google Drive/Development/basketball-db/spreads/2017-feb-0-18.csv", delimiter=",")
+games = np.genfromtxt("/home/kendall/Development/basketball-db/spreads/2017-feb-0-18.csv", delimiter=",")
 
-data_path = "/Users/kendallweihe/Google Drive/Development/2017/"
+data_path = "/home/kendall/Development/2017/"
 
 count = 0
 avg_game_number = []
