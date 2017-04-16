@@ -10,16 +10,16 @@ config = {
     "verification_path": "/home/kendall/Development/2017/",
     "game_number": 23,
     "teams_file": "/home/kendall/Development/basketball-db/teams.txt",
-    "training_percentage": 0.85,
+    "training_percentage": 0.95,
     "n_input": 94,
-    "n_hidden": 128,
+    "n_hidden": 16,
     "n_classes": 1,
     "n_steps": 22,
     "learning_rate": 0.01,
     "batch_size": 60,
     "save_model_path": "./models/23/",
     "save_step": 1000,
-    "training_iterations": 20001,
+    "training_iterations": 1000001,
     "training": True,
     "dropout": 0.75
 }
@@ -37,7 +37,7 @@ biases = {
     'out': tf.Variable(tf.zeros([config["n_classes"]]))
 }
 
-pred = network.RNN(x, weights, biases, config)
+pred = network.RNN(x, keep_prob, weights, biases, config)
 n_samples = tf.cast(tf.shape(x)[0], tf.float32)
 cost = tf.reduce_sum(tf.pow(pred-y, 2))/(2*n_samples)
 optimizer = tf.train.AdamOptimizer(learning_rate=config["learning_rate"]).minimize(cost)
@@ -58,11 +58,11 @@ with tf.Session() as sess:
         start_pos = np.random.randint(len(training_data) - config["batch_size"])
         batch_x = training_data[start_pos:start_pos+config["batch_size"],:,:]
         batch_y = ground_truth[start_pos:start_pos+config["batch_size"]]
-        sess.run(optimizer, feed_dict={x: batch_x, y: batch_y})
-        train_acc, train_loss = sess.run([accuracy, cost], feed_dict={x: batch_x, y: batch_y, keep_prob: config["dropout"]})
+        sess.run(optimizer, feed_dict={x: batch_x, y: batch_y, keep_prob: config["dropout"]})
+        train_acc, train_loss = sess.run([accuracy, cost], feed_dict={x: batch_x, y: batch_y, keep_prob: 1.0})
 
-        samples = sess.run(pred, feed_dict={x: testing_data, keep_prob: 1.0})
-        data.compute_acc(samples, testing_ground_truth, "testing")
+        # samples = sess.run(pred, feed_dict={x: testing_data, keep_prob: 1.0})
+        # data.compute_acc(samples, testing_ground_truth, "testing")
         # test_acc, test_loss = sess.run([accuracy, cost], feed_dict={x: testing_data, y: testing_ground_truth, keep_prob: 1.0})
 
         samples = sess.run(pred, feed_dict={x: verification_data, keep_prob: 1.0})
