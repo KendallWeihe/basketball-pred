@@ -11,10 +11,10 @@ def RNN(x, keep_prob, weights, biases, config):
     # all_lstm_outputs = tf.reshape(tf.stack(outputs, axis=1), [-1, config["n_steps"]*config["n_hidden"]])
     # output = tf.matmul(outputs[-1], weights['out']) + biases['out']
 
-    # l1 = slim.batch_norm(slim.fully_connected(outputs[-1], 50))
-    # l2 = slim.batch_norm(slim.fully_connected(l1, 50))
-    # output = slim.fully_connected(l2, 1, activation_fn=None)
+    l1 = slim.batch_norm(slim.fully_connected(outputs[-1], 50))
+    l2 = slim.batch_norm(slim.fully_connected(l1, 50))
+    output = slim.fully_connected(l2, 1, activation_fn=None)
 
-    output = slim.fully_connected(outputs[-1], 1, activation_fn=None)
+    # output = slim.fully_connected(outputs[-1], 1, activation_fn=None)
     output = tf.reshape(output, [-1])
     return tf.nn.dropout(output, keep_prob)

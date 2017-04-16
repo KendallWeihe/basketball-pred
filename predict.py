@@ -76,7 +76,7 @@ pred = network.RNN(x, keep_prob, weights, biases, config)
 # Launch the graph
 with tf.Session() as sess:
     saver = tf.train.Saver()
-    saver.restore(sess, config["retore_model_path"]+"20000.ckpt")
+    saver.restore(sess, config["retore_model_path"]+"9000.ckpt")
 
     pred = sess.run(pred, feed_dict={x: predict_data, keep_prob: 1.0})[0]
     # print("Prediction: {:.3f}\tVegas: {:.3f}\tGround truth: {:.3f}".format(pred, vegas_spread, ground_truth))
