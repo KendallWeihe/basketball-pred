@@ -8,8 +8,8 @@ import data
 import network
 
 config = {
-    "seasons_path": "/home/kendall/Development/basketball-db/accumulated/",
-    "data_path": "/home/kendall/Development/basketball-db/tmp/{}/".format(sys.argv[11]),
+    "seasons_path": "/home/kendall/Development/basketball-db/seasons/",
+    "data_path": "/home/kendall/Development/2017/",
     "game_number": int(float(sys.argv[1])),
     "teams_file": "/home/kendall/Development/basketball-db/teams.txt",
     "training_percentage": 1.0,
@@ -77,22 +77,17 @@ biases = {
 
 pred = network.RNN(x, keep_prob, weights, biases, config)
 
-model_files = [sys.argv[6], sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10]]
+# model_files = ["n_input-22-run-1/60000", "n_input-22-run-2/60000", \
+#     "n_input-22-run-3/60000", "n_input-22-run-4/60000", \
+#     "n_input-22-run-5/60000", "n_input-22-run-6/60000", \
+#     "n_input-22-run-7/60000"]
+model_files = ["40000", "45000", "50000", "55000", "60000"]
 preds = []
 with tf.Session() as sess:
     for f in model_files:
         saver = tf.train.Saver()
-        saver.restore(sess, f+"/60000.ckpt")
+        saver.restore(sess, config["retore_model_path"]+f+".ckpt")
 
         preds.append(sess.run(pred, feed_dict={x: predict_data, keep_prob: 1.0})[0])
     # print("Prediction: {:.3f}\tVegas: {:.3f}\tGround truth: {:.3f}".format(pred, vegas_spread, ground_truth))
     print("{},{},{}".format(np.mean(preds), ground_truth, vegas_spread))
-    try:
-        predictions = np.genfromtxt("./predictions/{}-{}.csv".format(sys.argv[11], sys.argv[1]), delimiter=",")
-        if len(predictions.shape) == 1:
-            predictions = [predictions]
-        predictions = np.concatenate((predictions, [[np.mean(preds), ground_truth, vegas_spread]]), axis=0)
-    except:
-        predictions = [[np.mean(preds), ground_truth, vegas_spread]]
-
-    np.savetxt("./predictions/{}-{}.csv".format(sys.argv[11], sys.argv[1]), predictions, delimiter=",")

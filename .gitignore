@@ -2,3 +2,6 @@ models/
 *.pyc
 tmp/
 comparisons/
+accumulated/
+tmp/
+predictions/

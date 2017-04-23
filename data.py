@@ -29,36 +29,40 @@ class Data:
 
     def read_data(self, config):
         seasons = os.listdir(config["seasons_path"])
-        seasons.sort()
         raw_data = []
+        count = 0
         for s in seasons:
             files = os.listdir(config["seasons_path"]+s)
             for f in files:
-                team1 = np.genfromtxt(config["seasons_path"]+s+"/"+f, delimiter=",")
-
-                if team1.shape[0] < config["game_number"]:
-                    continue
-
+                # team1 = np.genfromtxt(config["seasons_path"]+s+"/"+f, delimiter=",")
                 try:
-                    team1 = team1[::-1,:]
+                    team1 = np.genfromtxt(config["seasons_path"]+s+"/"+f, delimiter=",")[:,[0,43,3,15,16,19,21,24,36,37,40,42,46]]
 
-                    team2_index = team1[config["game_number"],43]
+                    if team1.shape[0] < config["game_number"]:
+                        continue
+
+                    team1 = team1[::-1,:]
+                    team2_index = team1[config["game_number"],1]
                     team2_file = self.teams[int(team2_index)]
 
-                    team2 = np.genfromtxt(config["seasons_path"]+s+"/"+team2_file+".csv", delimiter=",")
+                    # team2 = np.genfromtxt(config["seasons_path"]+s+"/"+team2_file+".csv", delimiter=",")
+                    team2 = np.genfromtxt(config["seasons_path"]+s+"/"+team2_file+".csv", delimiter=",")[:,[0,3,15,16,19,21,24,36,37,40,42,46]]
+
                     team2 = team2[::-1,:]
                     team2_game_number = np.where(team2[:,0] == team1[config["game_number"],0])[0][0]
+                    team1 = team1[0:config["game_number"]+1,2:]
+                    team2 = team2[:,1:]
 
-                    team1 = team1[0:config["game_number"],]
+                    count = count + 1
                     if team2_game_number > config["game_number"]:
-                        team2 = team2[team2_game_number-config["game_number"]:team2_game_number,:]
+                        team2 = team2[team2_game_number-config["game_number"]:team2_game_number+1,:]
                         aggregate_data = np.concatenate((team1, team2), axis=1)
                     elif team2_game_number < config["game_number"]:
-                        temp = np.zeros((config["game_number"], team1.shape[1]))
-                        temp[config["game_number"]-team2_game_number:config["game_number"],:] = team2[0:team2_game_number,:]
+                        temp = np.zeros((team1.shape[0], team1.shape[1]))
+                        temp[config["game_number"]-team2_game_number:config["game_number"]+1,:] = team2[0:team2_game_number+1,:]
                         aggregate_data = np.concatenate((team1, temp), axis=1)
                     else:
-                        aggregate_data = np.concatenate((team1, team2[0:config["game_number"],:]), axis=1)
+                        aggregate_data = np.concatenate((team1, team2[0:config["game_number"]+1,:]), axis=1)
 
                     raw_data.append(aggregate_data)
 
@@ -71,7 +75,7 @@ class Data:
         ground_truth = []
         training_data = []
         for i in range(int(self.num_training_examples)):
-            spread = self.raw_data[i,config["game_number"]-1,46]
+            spread = self.raw_data[i,config["game_number"],10]
             ground_truth.append(spread)
             training_data.append(self.raw_data[i,0:config["game_number"]-1,:])
 
@@ -82,7 +86,7 @@ class Data:
         ground_truth = []
         testing_data = []
         for i in range(int(self.num_training_examples), self.raw_data.shape[0]):
-            spread = self.raw_data[i,config["game_number"]-1,46]
+            spread = self.raw_data[i,config["game_number"],10]
             ground_truth.append(spread)
             testing_data.append(self.raw_data[i,0:config["game_number"]-1,:])
 
@@ -94,39 +98,41 @@ class Data:
 
         raw_data = []
         for team1_file in teams:
-            team1 = np.genfromtxt(config["verification_path"]+team1_file, delimiter=",")
-
-            if team1.shape[0] < config["game_number"]:
-                continue
-
             try:
+                team1 = np.genfromtxt(config["verification_path"]+team1_file, delimiter=",")[:,[0,43,3,15,16,19,21,24,36,37,40,42,46]]
+
+                if team1.shape[0] < config["game_number"]:
+                    continue
+
                 team1 = team1[::-1,:]
+                team2_index = team1[config["game_number"],1]
+                team2_file = self.teams[int(team2_index)]
 
-                team2_index = team1[config["game_number"],43]
-                team2_name = self.teams[int(team2_index)]
-
-                team2 = np.genfromtxt(config["verification_path"]+team2_name+".csv", delimiter=",")
+                # team2 = np.genfromtxt(config["seasons_path"]+s+"/"+team2_file+".csv", delimiter=",")
+                team2 = np.genfromtxt(config["verification_path"]+team2_file+".csv", delimiter=",")[:,[0,3,15,16,19,21,24,36,37,40,42,46]]
                 team2 = team2[::-1,:]
                 team2_game_number = np.where(team2[:,0] == team1[config["game_number"],0])[0][0]
 
-                team1 = team1[0:config["game_number"],]
+                team1 = team1[0:config["game_number"]+1,2:]
+                team2 = team2[:,1:]
+
                 if team2_game_number > config["game_number"]:
-                    team2 = team2[team2_game_number-config["game_number"]:team2_game_number,:]
+                    team2 = team2[team2_game_number-config["game_number"]:team2_game_number+1,:]
                     aggregate_data = np.concatenate((team1, team2), axis=1)
                 elif team2_game_number < config["game_number"]:
-                    temp = np.zeros((config["game_number"], team1.shape[1]))
-                    temp[config["game_number"]-team2_game_number:config["game_number"],:] = team2[0:team2_game_number,:]
+                    temp = np.zeros((team1.shape[0], team1.shape[1]))
+                    temp[config["game_number"]-team2_game_number:config["game_number"]+1,:] = team2[0:team2_game_number+1,:]
                     aggregate_data = np.concatenate((team1, temp), axis=1)
                 else:
-                    aggregate_data = np.concatenate((team1, team2[0:config["game_number"],:]), axis=1)
+                    aggregate_data = np.concatenate((team1, team2[0:config["game_number"]+1,:]), axis=1)
 
                 raw_data.append(aggregate_data)
 
             except:
                 continue
 
+        self.verification_ground_truth = np.array(raw_data)[:,config["game_number"],10]
         self.verification_data = np.array(raw_data)[:,0:config["game_number"]-1,:]
-        self.verification_ground_truth = np.array(raw_data)[:,config["game_number"]-1,46]
 
     def normalize_data(self):
         for i in range(self.raw_data.shape[2]):

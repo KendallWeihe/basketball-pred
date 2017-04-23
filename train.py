@@ -1,25 +1,26 @@
 import tensorflow as tf
 import numpy as np
 import pdb
+import sys
 
 import data
 import network
 
 config = {
-    "seasons_path": "/home/kendall/Development/basketball-db/seasons/",
-    "verification_path": "/home/kendall/Development/2017/",
-    "game_number": 23,
+    "seasons_path": "/home/kendall/Development/basketball-db/accumulated/",
+    "verification_path": "/home/kendall/Development/basketball-db/tmp/{}/".format(sys.argv[3]),
+    "game_number": int(sys.argv[1]),
     "teams_file": "/home/kendall/Development/basketball-db/teams.txt",
-    "training_percentage": 0.95,
-    "n_input": 94,
-    "n_hidden": 64,
+    "training_percentage": 0.98,
+    "n_input": 22,
+    "n_hidden": 16,
     "n_classes": 1,
-    "n_steps": 22,
+    "n_steps": int(sys.argv[1])-1,
     "learning_rate": 0.01,
     "batch_size": 60,
-    "save_model_path": "./models/23/",
-    "save_step": 1000,
-    "training_iterations": 1000001,
+    "save_model_path": sys.argv[2]+"/",
+    "save_step": 60000,
+    "training_iterations": 60001,
     "training": True,
     "dropout": 0.75
 }
@@ -50,6 +51,9 @@ with tf.Session() as sess:
     saver = tf.train.Saver()
     init = tf.global_variables_initializer()
     sess.run(init)
+    # saver = tf.train.Saver()
+    # saver.restore(sess, "models/23/n-hidden-16/660000.ckpt")
+
     training_data, ground_truth = d.get_training_data()
     testing_data, testing_ground_truth = d.get_testing_data()
     verification_data, verification_ground_truth = d.get_verification_data()
@@ -66,12 +70,14 @@ with tf.Session() as sess:
         # test_acc, test_loss = sess.run([accuracy, cost], feed_dict={x: testing_data, y: testing_ground_truth, keep_prob: 1.0})
 
         samples = sess.run(pred, feed_dict={x: verification_data, keep_prob: 1.0})
-        data.compute_acc(samples, verification_ground_truth, "verification")
         # verification_acc, verification_loss = sess.run([accuracy, cost], feed_dict={x: verification_data, y: verification_ground_truth, keep_prob: 1.0})
 
+        print("Game number: {}\tSeason: {}".format(sys.argv[1], sys.argv[3]))
+        print("Training size: {}".format(training_data.shape[0]))
         print("Training\tAcc: {}\tLoss: {}".format(train_acc, train_loss))
         # print("Testing\t\tAcc: {}\tLoss: {}".format(test_acc, test_loss))
         # print("Verification\t\tAcc: {}\tLoss: {}".format(verification_acc, verification_loss))
+        data.compute_acc(samples, verification_ground_truth, "verification")
         print("Iteration: {}\n".format(iteration))
 
         if iteration % config["save_step"] == 0:
