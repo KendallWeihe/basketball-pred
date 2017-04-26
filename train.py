@@ -7,10 +7,10 @@ import data
 import network
 
 config = {
-    "seasons_path": "/Users/kendallweihe/Google Drive/Development/basketball-db/seasons/",
-    "verification_path": "/Users/kendallweihe/Google Drive/Development/basketball-db/tmp/{}/".format(sys.argv[3]),
+    "seasons_path": "/home/kendall/Development/basketball-db/accumulated/",
+    "verification_path": "/home/kendall/Development/basketball-db/tmp/{}/".format(sys.argv[3]),
     "game_number": int(sys.argv[1]),
-    "teams_file": "/Users/kendallweihe/Google Drive/Development/basketball-db/teams.txt",
+    "teams_file": "/home/kendall/Development/basketball-db/teams.txt",
     "training_percentage": 0.98,
     "n_input": 22,
     "n_hidden": 16,

@@ -7,14 +7,19 @@ import os
 predictions = None
 files = os.listdir("./predictions/")
 for f in files:
-    # if "-8.csv" in f:
-    # if "2017" in f:
+    # if "-14.csv" in f or "-16.csv" in f or "-17.csv" in f or "-18.csv" in f\
+    #     or "-19.csv" in f or "-20.csv" in f or "-21.csv" in f:
+    # if "-14.csv" in f or "-16.csv" in f or "-17.csv" in f:
+    # if "-18.csv" in f:
     if predictions is None:
         predictions = np.genfromtxt("./predictions/"+f, delimiter=",")
     else:
         predictions = np.concatenate((predictions, np.genfromtxt("./predictions/"+f, delimiter=",")), axis=0)
 
-for i in range(1,15):
+# for p in predictions:
+#     p[0] = (p[0] + p[2]) / 2
+
+for i in range(0,15):
     total_count = 0
     spread_correct = 0
     confident_scale = i
@@ -26,7 +31,7 @@ for i in range(1,15):
     avg_vegas_diff = 0
     for p in predictions:
         # pdb.set_trace()
-        # p[0] = (p[0] + p[2]) / 2
+        # if -2 <= p[0] <= 2:
 
         if not (p[0] < p[2] < p[1]) and not (p[0] > p[2] > p[1]):
             spread_correct = spread_correct + 1
@@ -60,5 +65,18 @@ for i in range(1,15):
     except:
         pass
 
-#for p in predictions:
+# for p in predictions:
 #    print("{},{},{}".format(p[0],p[1],p[2]))
+
+# correct = []
+# incorrect = []
+# for p in predictions:
+#     if -10 <= p[0] <= 10:
+#         if not (p[0] < p[2] < p[1]) and not (p[0] > p[2] > p[1]):
+#             correct.append([p[0], p[1]])
+#         else:
+#             incorrect.append([p[0], p[1]])
+#
+#
+# pdb.set_trace()
+print
